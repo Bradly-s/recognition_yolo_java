@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="options_array">
+        <item>请选择一个选项</item>
+        <item>选项1</item>
+        <item>选项2</item>
+        <item>选项3</item>
+    </string-array>
+</resources>

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+
+    android:layout_height="match_parent"
+    app:layout_constraintHeight_percent="0.5"
+    app:layout_constraintVertical_bias="0.5"
+
+    android:layout_margin="8dp"
+
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?android:attr/selectableItemBackground">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl_item"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        >
+
+        <ImageView
+            android:id="@+id/iv_item_pic"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:scaleType="centerCrop"
+            tools:src="@drawable/pic_cow_main"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!--单选按钮-->
+        <RadioGroup
+            android:id="@+id/radio_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            >
+
+            <RadioButton
+                android:id="@+id/radio_button_option1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="单选选项1" />
+
+            <RadioButton
+                android:id="@+id/radio_button_option2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="单选选项2" />
+
+            <RadioButton
+                android:id="@+id/radio_button_option3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="单选选项3" />
+
+        </RadioGroup>
+
+        <!-- 多选按钮布局 -->
+        <LinearLayout
+            android:id="@+id/check_box_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/radio_group"
+            android:layout_marginTop="16dp">
+
+            <CheckBox
+                android:id="@+id/check_box_option1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="多选选项1" />
+
+            <CheckBox
+                android:id="@+id/check_box_option2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="多选选项2" />
+
+            <CheckBox
+                android:id="@+id/check_box_option3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="多选选项3" />
+
+        </LinearLayout>
+
+        <Spinner
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/spinner_options"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:entries="@array/options_array"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/check_box_group"
+            android:layout_marginTop="16dp"
+            android:text="请选择一个选项"
+            />
+
+        <TextView
+            android:id="@+id/tv_title_item"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="16dp"
+            android:gravity="center"
+            android:textColor="@color/standardWhite"
+            android:textSize="@dimen/text_size_xxxl"
+            android:textStyle="italic"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0"
+            tools:text="Item" />
+
+        <TextView
+            android:id="@+id/tv_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/standardWhite"
+            android:textSize="@dimen/text_size_xl"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_title_item"
+            app:layout_constraintLeft_toRightOf="@+id/tv_title_item"
+            app:layout_constraintTop_toTopOf="@+id/tv_title_item"
+            tools:text="this is description " />
+
+<!--        精灵启动开关-->
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/sw_select"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="24dp"
+            android:layout_marginStart="16dp"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_description"
+            app:layout_constraintTop_toTopOf="@+id/tv_description"
+            android:text="@string/switch_start"
+            app:layout_constraintVertical_bias="0.0" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>
