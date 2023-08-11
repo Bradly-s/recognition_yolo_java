@@ -57,6 +57,7 @@
         <service android:name=".service.FloatingPetService" />
 
         <activity android:name=".view.activity.SettingActivity"></activity>
+        <activity android:name=".yolov5ncnn.yoloMainActivity"></activity>
     </application>
 
 </manifest>

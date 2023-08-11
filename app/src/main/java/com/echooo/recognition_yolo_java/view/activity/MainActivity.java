@@ -4,9 +4,12 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 //import android.support.constraint.ConstraintLayout;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.constraintlayout.widget.ConstraintLayout;
 //import android.support.design.widget.FloatingActionButton;
 import com.echooo.recognition_yolo_java.utils.FloatingRefreshTask;
+import com.echooo.recognition_yolo_java.utils.LogUtils;
+import com.echooo.recognition_yolo_java.yolov5ncnn.yoloMainActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 //import android.support.v7.widget.LinearLayoutManager;
 //import android.support.v7.widget.RecyclerView;
@@ -35,6 +38,7 @@ public class MainActivity extends BaseActivity<MainVInterface, MainPresenter> im
 
     private RecyclerView mRvMain;
     private FloatingActionButton mFABSetting;
+    private SwitchCompat yolo_test;
 
     @Override
     protected MainPresenter createPresenter() {
@@ -56,6 +60,7 @@ public class MainActivity extends BaseActivity<MainVInterface, MainPresenter> im
         findAllViewById();
         initRv();
         mFABSetting.setOnClickListener(this);
+        yolo_test.setOnClickListener(this);
     }
 
     /**
@@ -104,6 +109,7 @@ public class MainActivity extends BaseActivity<MainVInterface, MainPresenter> im
     protected void findAllViewById() {
         mRvMain = $(R.id.rv_main);
         mFABSetting = $(R.id.fab_setting);
+        yolo_test = $(R.id.yolo_test);
     }
 
 //    @Override
@@ -131,10 +137,12 @@ public class MainActivity extends BaseActivity<MainVInterface, MainPresenter> im
         int viewId = view.getId();
         if (viewId == R.id.rv_main) {
             System.out.println("====R.id.rv_main=======");
+            LogUtils.e("====R.id.rv_main=======");
 
             // 处理 RecyclerView 的点击事件
         } else if (viewId == R.id.fab_setting) {
             System.out.println("====R.id.fab_setting =======");
+            LogUtils.e("====R.id.fab_setting =======");
             Intent intent = new Intent(MainActivity.this, SettingActivity.class);
             startActivityWithAnim(intent);
         }
@@ -151,6 +159,18 @@ public class MainActivity extends BaseActivity<MainVInterface, MainPresenter> im
 //            home.addCategory(Intent.CATEGORY_HOME);
 //            startActivity(home);
 //        }
+
+
+//        测试调用yolo是否可行 【临时代码】
+        else if (viewId == R.id.yolo_test) {
+            System.out.println("单选按钮1点击！");
+            LogUtils.e("单选按钮1点击！");
+//            启动yoloMainActivity
+            Intent intentYolo = new Intent(MainActivity.this, yoloMainActivity.class);
+            startActivity(intentYolo);
+
+        }
+
     }
 
 
@@ -166,6 +186,7 @@ public class MainActivity extends BaseActivity<MainVInterface, MainPresenter> im
     @Override
     public void launchDesktopPet() {
         System.out.println("进入launchDesktopPet");
+        LogUtils.e("进入launchDesktopPet");
         //启动悬浮pet
         Intent intent = new Intent(MainActivity.this, FloatingPetService.class);
         startService(intent);
