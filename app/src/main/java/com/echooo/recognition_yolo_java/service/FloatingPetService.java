@@ -27,15 +27,13 @@ public class FloatingPetService extends Service {
 
     @Override
     public void onCreate() {
-        LogUtils.e("FloatingPetService - onCreate");
-        System.out.println("FloatingPetService - onCreate");
+        LogUtils.logWithMethodInfo();
         super.onCreate();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        LogUtils.e("FloatingPetService - onStartCommand");
-        System.out.println("FloatingPetService - onStartCommand");
+        LogUtils.logWithMethodInfo();
         if (mTimer == null) {
             mTimer = new Timer();
             mTimer.scheduleAtFixedRate(new FloatingRefreshTask(this.getPackageManager(), (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE), getApplicationContext()), 0, 500);
@@ -45,7 +43,7 @@ public class FloatingPetService extends Service {
 
     @Override
     public void onDestroy() {
-        LogUtils.e("FloatingPetService - onDestroy");
+        LogUtils.logWithMethodInfo();
         mTimer.cancel();
         mTimer = null;
         super.onDestroy();

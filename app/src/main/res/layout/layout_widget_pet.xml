@@ -4,6 +4,7 @@
     android:id="@+id/ll_pet"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:theme="@style/AppTheme"
     android:gravity="center"
     android:orientation="vertical">
 
@@ -12,12 +13,19 @@
         android:layout_width="90dp"
         android:layout_height="90dp" />
 
+<!--    <Button-->
+<!--        android:id="@+id/selectImageButton"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="Select Image"-->
+<!--        android:onClick="onSelectImageClick" />-->
+
     <!-- 在这里定义展开时显示的内容 【算法返回的结果展示】-->
     <TextView
         android:id="@+id/contract"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World"
+        android:text="Processing result: ..."
         android:background="@android:color/white"
         android:visibility="gone"/>
 

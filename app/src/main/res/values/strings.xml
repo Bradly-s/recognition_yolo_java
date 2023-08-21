@@ -29,8 +29,14 @@
     <string name="intro_dialog_phone_captcha">验证码</string>
     <string name="switch_start">启动精灵</string>
     <string name="person_info">个人中心</string>
+    <string name="setting_info">精灵设置</string>
 
-
+    <string name="image_view">Image View</string>
+    <string name="detect">Detect</string>
+    <string name="run_model">Running the model...</string>
+    <string name="restart">Restart</string>
+    <string name="select">Select</string>
+    <string name="live">Live</string>
 
     <array name="array_intro_tips">
         <item>@string/intro_first</item>

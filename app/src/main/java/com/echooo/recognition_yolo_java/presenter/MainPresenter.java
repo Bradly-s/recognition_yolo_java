@@ -15,8 +15,12 @@ import com.echooo.recognition_yolo_java.entity.PetInfo;
 import com.echooo.recognition_yolo_java.model.MainModel;
 import com.echooo.recognition_yolo_java.model.minterface.MainMInterface;
 import com.echooo.recognition_yolo_java.utils.AppConstants;
+import com.echooo.recognition_yolo_java.utils.LogUtils;
 import com.echooo.recognition_yolo_java.utils.ToastUtil;
 import com.echooo.recognition_yolo_java.view.vinterface.MainVInterface;
+
+import java.io.File;
+import java.net.URL;
 
 /**
  * Created by Goo on 2016-9-18.
@@ -48,9 +52,11 @@ public class MainPresenter extends BasePresenter<MainVInterface> {
 
             @Override
             public void onPetSelected(CompoundButton buttonView, int petId) {
-                System.out.println("-----------onPetSelected-----------");
+                LogUtils.logWithMethodInfo();
+
                 boolean isCheck = buttonView.isChecked();
                 if (isCheck) {
+                    LogUtils.logWithMethodInfo("isCheck");
                     view.launchDesktopPet();
                 }
                 switch (petId) {

@@ -44,6 +44,7 @@ public class FloatingPetManager {
      * @param context
      */
     public static void createPetWindow(Context context) {
+        LogUtils.logWithMethodInfo();
         // 在Activity中动态请求悬浮窗口权限
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(context)) {
             showToast(context, "请打开此应用悬浮窗权限");
@@ -57,6 +58,7 @@ public class FloatingPetManager {
             int screenHeight = windowManager.getDefaultDisplay().getHeight();
             if (mFPetView == null) {
                 mFPetView = new FloatingPetView(context);
+//                mFPetView = new FloatingPetView(context, null);
                 if (mParams == null) {
                     mParams = new WindowManager.LayoutParams();
 //                    mParams.type = WindowManager.LayoutParams.TYPE_PHONE;

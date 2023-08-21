@@ -2,6 +2,8 @@ plugins {
     id 'com.android.application'
 }
 
+
+
 android {
     namespace 'com.echooo.recognition_yolo_java'
     compileSdk 33
@@ -56,4 +58,17 @@ dependencies {
     implementation 'fr.erictruong:materialedittext:0.2.0'
 
     implementation 'androidx.cardview:cardview:1.0.0'
+
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation 'org.pytorch:pytorch_android_lite:1.10.0'
+    implementation 'org.pytorch:pytorch_android_torchvision_lite:1.10.0'
+
+    def camerax_version = "1.0.0-alpha05"
+    implementation "androidx.camera:camera-core:$camerax_version"
+    implementation "androidx.camera:camera-camera2:$camerax_version"
+
+    implementation 'org.python:jython-standalone:2.7.2'
+//    implementation 'com.chaquo.python:android:9.1.1'
+
+
 }
