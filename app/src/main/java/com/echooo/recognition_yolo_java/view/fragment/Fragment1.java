@@ -2,11 +2,13 @@ package com.echooo.recognition_yolo_java.view.fragment;
 
 import android.os.Bundle;
 
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 
 import com.echooo.recognition_yolo_java.R;
 
@@ -25,6 +27,9 @@ public class Fragment1 extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    private SwitchCompat switchCompat;
+    private OnSwitchChangeListener switchChangeListener;
 
     public Fragment1() {
         // Required empty public constructor
@@ -55,13 +60,45 @@ public class Fragment1 extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+
     }
 
+//    @Override
+//    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+//                             Bundle savedInstanceState) {
+//        // Inflate the layout for this fragment
+////        return inflater.inflate(R.layout.fragment_1, container, false);
+////        return inflater.inflate(R.layout.activity_main, container, false);
+//        return inflater.inflate(R.layout.layout_rv_item_main, container, false);
+//    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-//        return inflater.inflate(R.layout.fragment_1, container, false);
-        return inflater.inflate(R.layout.activity_main, container, false);
+        View rootView = inflater.inflate(R.layout.layout_rv_item_main, container, false);
+
+        // 获取SwitchCompat组件
+        switchCompat = rootView.findViewById(R.id.sw_select);
+
+        // 设置SwitchCompat的点击事件监听器
+        switchCompat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (switchChangeListener != null) {
+                    switchChangeListener.onSwitchChanged(isChecked);
+                }
+            }
+        });
+
+        return rootView;
     }
+
+    public interface OnSwitchChangeListener {
+        void onSwitchChanged(boolean isChecked);
+    }
+
+    public void setOnSwitchChangeListener(OnSwitchChangeListener listener) {
+        this.switchChangeListener = listener;
+    }
+
 }

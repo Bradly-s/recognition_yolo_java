@@ -20,11 +20,15 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.chaquo.python.PyObject;
+import com.chaquo.python.Python;
+import com.chaquo.python.android.AndroidPlatform;
 import com.echooo.recognition_yolo_java.PythonActivityNew;
 import com.echooo.recognition_yolo_java.R;
 import com.echooo.recognition_yolo_java.utils.FloatingUtils;
 import com.echooo.recognition_yolo_java.utils.LogUtils;
 //import com.echooo.recognition_yolo_java.view.activity.MainActivity;
+import com.echooo.recognition_yolo_java.view.activity.MainActivityLast;
 import com.echooo.recognition_yolo_java.view.activity.NewMainActivity;
 import com.echooo.recognition_yolo_java.yoloobjdetect.PrePostProcessor;
 import com.echooo.recognition_yolo_java.yoloobjdetect.Result;
@@ -109,7 +113,8 @@ public class FloatingPetView extends LinearLayout implements Runnable{
 
     private static final int REQUEST_IMAGE_PICK = 101; // Arbitrary request code
 //    private MainActivity mainActivity;
-    private NewMainActivity mainActivity;
+//    private NewMainActivity mainActivity;
+    private MainActivityLast mainActivity;
     private Context mContext; // 添加这个成员变量
     private Application mApplication;
 
@@ -124,6 +129,8 @@ public class FloatingPetView extends LinearLayout implements Runnable{
         LogUtils.logWithMethodInfo();
 //        setMainActivity(mainActivity);
         mApplication = application;
+
+
     }
 
     // 设置 Context 的方法
@@ -136,7 +143,11 @@ public class FloatingPetView extends LinearLayout implements Runnable{
 //        LogUtils.logWithMethodInfo("mainActivity:" + mainActivity);
 //        this.mainActivity = mainActivity;
 //    }
-    public void setMainActivity(NewMainActivity newMainActivity) {
+//    public void setMainActivity(NewMainActivity newMainActivity) {
+//        LogUtils.logWithMethodInfo("mainActivity:" + newMainActivity);
+//        this.mainActivity = newMainActivity;
+//    }
+    public void setMainActivity(MainActivityLast newMainActivity) {
         LogUtils.logWithMethodInfo("mainActivity:" + newMainActivity);
         this.mainActivity = newMainActivity;
     }
@@ -152,6 +163,8 @@ public class FloatingPetView extends LinearLayout implements Runnable{
         initViewParams(context);
         defaultPetStatus();
         initExpandableView(context);
+
+
     }
 
 
@@ -465,6 +478,7 @@ public class FloatingPetView extends LinearLayout implements Runnable{
         processExpandableView();
 //        todo ： 未完成，报错
 //        processPython(mContext);
+        processPythonNew();
 
 
 
@@ -476,6 +490,20 @@ public class FloatingPetView extends LinearLayout implements Runnable{
 //            mResultView.invalidate();
 //            mResultView.setVisibility(View.VISIBLE);
 //        });
+    }
+
+    public void processPythonNew() {
+        LogUtils.logWithMethodInfo("processPythonNew");
+//        mainActivityLast.getApplicationContext();
+//        if (!Python.isStarted()){
+//            LogUtils.logWithMethodInfo("!Python.isStarted()");
+////            Python.start(new AndroidPlatform(mContext.getApplicationContext()));
+//            Python.start(new AndroidPlatform(mContext));
+//        }
+//        Python python=Python.getInstance();
+//        PyObject pyObject=python.getModule("helloworld");
+//        pyObject.callAttr("sayHello");
+
     }
 
     private Executor executor = Executors.newSingleThreadExecutor();

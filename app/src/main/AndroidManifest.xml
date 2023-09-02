@@ -43,49 +43,55 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".PythonActivityNew"
-            android:exported="false" />
-        <activity
-            android:name=".pythonProject.PythonActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".view.activity.IntroActivity"
-            android:exported="true"
-            android:screenOrientation="portrait">
-
-<!--            &lt;!&ndash;             开发调试时将其注释，开发完打开 &ndash;&gt;-->
+            android:name=".view.activity.MainActivityLast"
+            android:exported="true">
 <!--            <intent-filter>-->
 <!--                <action android:name="android.intent.action.MAIN" />-->
 
 <!--                <category android:name="android.intent.category.LAUNCHER" />-->
 <!--            </intent-filter>-->
         </activity>
+        <activity
+            android:name=".PythonActivityNew"
+            android:exported="false" />
+        <activity
+            android:name=".pythonProject.PythonActivity"
+            android:exported="false" />
+        <activity
+            android:name=".view.activity.IntroActivity"
+            android:exported="true"
+            android:screenOrientation="portrait">
 
+            <!-- &lt;!&ndash;             开发调试时将其注释，开发完打开 &ndash;&gt; -->
+             <intent-filter>
+             <action android:name="android.intent.action.MAIN" />
+
+
+             <category android:name="android.intent.category.LAUNCHER" />
+             </intent-filter>
+        </activity>
         <activity
             android:name=".view.activity.NewMainActivity"
-            android:exported="true">
+            android:exported="false">
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
 
-             <intent-filter>
-                 <action android:name="android.intent.action.MAIN" />
-
-
-                 <category android:name="android.intent.category.LAUNCHER" />
-             </intent-filter>
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
         </activity>
         <activity
             android:name=".view.activity.MainActivity"
             android:exported="true"
             android:screenOrientation="portrait">
-<!--            &lt;!&ndash; 开发调试时将其打开，开发完注释 &ndash;&gt;-->
-<!--             <intent-filter>-->
-<!--                 <action android:name="android.intent.action.MAIN" />-->
+
+            <!-- &lt;!&ndash; 开发调试时将其打开，开发完注释 &ndash;&gt; -->
+            <!-- <intent-filter> -->
+            <!-- <action android:name="android.intent.action.MAIN" /> -->
 
 
-<!--                 <category android:name="android.intent.category.LAUNCHER" />-->
-<!--             </intent-filter>-->
+            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+            <!-- </intent-filter> -->
         </activity>
-
 
         <service android:name=".service.FloatingPetService" />
 

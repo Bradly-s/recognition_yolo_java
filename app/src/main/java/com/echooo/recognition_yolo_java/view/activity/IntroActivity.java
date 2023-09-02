@@ -273,7 +273,8 @@ public class IntroActivity extends BaseActivity<IntroVInterface, IntroPresenter>
      */
     private void EnterMain(String userName) {
         AppConstants.USER_NAME = userName;
-        Intent intent = new Intent(IntroActivity.this, MainActivity.class);
+//        Intent intent = new Intent(IntroActivity.this, MainActivity.class);
+        Intent intent = new Intent(IntroActivity.this, MainActivityLast.class);
         startActivityWithAnim(intent);
         finish();
     }

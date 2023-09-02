@@ -179,7 +179,7 @@ public class NewMainActivity extends BaseActivity<MainVInterface, MainPresenter>
         // 创建 FloatingPetView 实例并设置 MainActivity
         floatingPetView = new FloatingPetView(NewMainActivity.this, this.getApplication()); // 这里的 this 是指当前的 MainActivity
 //        floatingPetView = new FloatingPetView(MainActivity.this, null); // 这里的 this 是指当前的 MainActivity
-        floatingPetView.setMainActivity(this); // 将 MainActivity 实例传递给 FloatingPetView
+//        floatingPetView.setMainActivity(this); // 将 MainActivity 实例传递给 FloatingPetView
 
         viewPager = findViewById(R.id.view_pager);
         setupViewPager(viewPager);
@@ -204,27 +204,14 @@ public class NewMainActivity extends BaseActivity<MainVInterface, MainPresenter>
     private void initRv() {
         LogUtils.logWithMethodInfo("context=>this:" + this);
 
-        //        todo: RecyclerView ,  No adapter attached; skipping layout
+        //        todo: [ 报错bug ] RecyclerView ,  No adapter attached; skipping layout
         RVMainAdapter rvAdapter = mPresenter.getRVAdapter(this);
         if (rvAdapter != null) {
             LogUtils.logWithMethodInfo("rvAdapter not null");
-            LinearLayoutManager mPerfectCourse = new LinearLayoutManager(this);
-            mPerfectCourse.setOrientation(LinearLayoutManager.HORIZONTAL);// 设置 recyclerview 布局方式为横向布局
-            mRvMain.setLayoutManager(mPerfectCourse);
-           // mRvMain.setLayoutManager(new LinearLayoutManager(this));
+            mRvMain.setLayoutManager(new LinearLayoutManager(this));
             mRvMain.setAdapter(rvAdapter);
 
-//            mRvMain.addOnScrollListener(new HidingScrollListener() {
-//                @Override
-//                public void onHide() {
-//                    hideFAB();
-//                }
-//
-//                @Override
-//                public void onShow() {
-//                    showFAB();
-//                }
-//            });
+
             ItemTouchHelper itemHelper = mPresenter.getItemTouchHelper(rvAdapter);
             itemHelper.attachToRecyclerView(mRvMain);
         } else {
@@ -260,7 +247,8 @@ public class NewMainActivity extends BaseActivity<MainVInterface, MainPresenter>
     public Fragment getItem(int position) {
         if (position == 0) {
             // 返回一个空的 Fragment，因为您希望 Tab1 对应的是 activity_main.xml 的内容
-            return new EmptyFragment(); // 您需要创建一个名为 EmptyFragment 的空 Fragment 类
+//            return new EmptyFragment(); // 您需要创建一个名为 EmptyFragment 的空 Fragment 类
+            return new Fragment1();
         } else if (position == 1) {
             return new Fragment2();
         } else {
@@ -286,24 +274,6 @@ public class NewMainActivity extends BaseActivity<MainVInterface, MainPresenter>
 
 
 
-
-
-    /**
-     * 显示悬浮按钮
-     */
-    private void showFAB() {
-        mFABSetting.animate().translationY(0).setInterpolator(new DecelerateInterpolator(1)).start();
-    }
-
-    /**
-     * 隐藏悬浮按钮
-     */
-    private void hideFAB() {
-        ConstraintLayout.LayoutParams lp = (ConstraintLayout.LayoutParams) mFABSetting.getLayoutParams();
-        int fabBottomMargin = lp.bottomMargin;
-        mFABSetting.animate().translationY(mFABSetting.getHeight() + fabBottomMargin + DimenUtils.getNavBarHeight(this) + DimenUtils.getStatusBarHeight(this)).
-                setInterpolator(new AccelerateInterpolator(2)).start();
-    }
 
 
     @Override

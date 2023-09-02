@@ -20,12 +20,12 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         externalNativeBuild {
-            cmake {
-                cppFlags ""
-                abiFilters 'armeabi", "armeabi-v7a", "arm64-v8a' //添加这个，这个是编译c源代码成为so库的时候指定的类型。注意：是编译成哪些类型，打包的时候是另外一回事，所以需要使用ndk指定打包abi类型。
-
-
-            }
+//            cmake {
+//                cppFlags ""
+//                abiFilters 'armeabi", "armeabi-v7a", "arm64-v8a' //添加这个，这个是编译c源代码成为so库的时候指定的类型。注意：是编译成哪些类型，打包的时候是另外一回事，所以需要使用ndk指定打包abi类型。
+//
+//
+//            }
         }
         ndk {      //添加这个，这个是打包时指定的abi类型
             abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
@@ -33,7 +33,8 @@ android {
         signingConfig signingConfigs.debug
 
         python {
-            version "3.8"
+//            version "3.8"
+            buildPython "D:/softs/miniconda3/envs/qtpy/python.exe"
         }
     }
 

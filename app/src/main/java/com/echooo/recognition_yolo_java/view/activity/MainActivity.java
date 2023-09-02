@@ -125,38 +125,11 @@ public class MainActivity extends BaseActivity<MainVInterface, MainPresenter> im
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 1);
         mRvMain.setLayoutManager(gridLayoutManager);
         mRvMain.setAdapter(rvAdapter);
-        mRvMain.addOnScrollListener(new HidingScrollListener() {
-            @Override
-            public void onHide() {
-                hideFAB();
-            }
-
-            @Override
-            public void onShow() {
-                showFAB();
-            }
-        });
         ItemTouchHelper itemHelper = mPresenter.getItemTouchHelper(rvAdapter);
         itemHelper.attachToRecyclerView(mRvMain);
     }
 
 
-    /**
-     * 显示悬浮按钮
-     */
-    private void showFAB() {
-        mFABSetting.animate().translationY(0).setInterpolator(new DecelerateInterpolator(1)).start();
-    }
-
-    /**
-     * 隐藏悬浮按钮
-     */
-    private void hideFAB() {
-        ConstraintLayout.LayoutParams lp = (ConstraintLayout.LayoutParams) mFABSetting.getLayoutParams();
-        int fabBottomMargin = lp.bottomMargin;
-        mFABSetting.animate().translationY(mFABSetting.getHeight() + fabBottomMargin + DimenUtils.getNavBarHeight(this) + DimenUtils.getStatusBarHeight(this)).
-                setInterpolator(new AccelerateInterpolator(2)).start();
-    }
 
     /**
      * 主界面、设置*/
