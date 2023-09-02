@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -24,13 +25,23 @@ import java.util.concurrent.TimeUnit;
 public class PythonExecutor {
     public static String runScript(InputStream scriptPath) {
         LogUtils.logWithMethodInfo("scriptPath:" + scriptPath);
+
+        // 从InputStream读取脚本内容
+        String scriptContent = readInputStream(scriptPath);
+
         PythonInterpreter interpreter = new PythonInterpreter();
 
-        interpreter.execfile(scriptPath);
+        interpreter.exec(scriptContent);
 
         PyObject obj = interpreter.get("print_hi");
         PyObject result = obj.__call__();
         return result.toString();
+    }
+
+    public static String readInputStream(InputStream inputStream) {
+        try (Scanner scanner = new Scanner(inputStream, "UTF-8").useDelimiter("\\A")) {
+            return scanner.hasNext() ? scanner.next() : "";
+        }
     }
 
 }

@@ -6,27 +6,38 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 //import android.support.constraint.ConstraintLayout;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.constraintlayout.widget.ConstraintLayout;
 //import android.support.design.widget.FloatingActionButton;
 import com.echooo.recognition_yolo_java.utils.FloatingRefreshTask;
 import com.echooo.recognition_yolo_java.utils.LogUtils;
+import com.echooo.recognition_yolo_java.view.fragment.Fragment1;
+import com.echooo.recognition_yolo_java.view.fragment.Fragment2;
+import com.echooo.recognition_yolo_java.view.fragment.Fragment3;
 import com.echooo.recognition_yolo_java.yoloobjdetect.MainActivity2;
 import com.echooo.recognition_yolo_java.yolov5ncnn.yoloMainActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 //import android.support.v7.widget.LinearLayoutManager;
 //import android.support.v7.widget.RecyclerView;
 //import android.support.v7.widget.helper.ItemTouchHelper;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.viewpager.widget.ViewPager;
 
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.TextView;
@@ -41,12 +52,15 @@ import com.echooo.recognition_yolo_java.utils.DimenUtils;
 import com.echooo.recognition_yolo_java.view.vinterface.MainVInterface;
 
 import com.echooo.recognition_yolo_java.view.widget.FloatingPetView;
+import com.google.android.material.tabs.TabLayout;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 主界面
@@ -62,6 +76,9 @@ public class MainActivity extends BaseActivity<MainVInterface, MainPresenter> im
     private SwitchCompat yolo_test;
 
     private static final int REQUEST_IMAGE_PICK = 101; // Arbitrary request code
+
+    private ViewPager viewPager;
+    private TabLayout tabLayout;
 
     @Override
     protected MainPresenter createPresenter() {
@@ -83,20 +100,30 @@ public class MainActivity extends BaseActivity<MainVInterface, MainPresenter> im
         findAllViewById();
         initRv();
 //        mFABSetting.setOnClickListener(this);
-        yolo_test.setOnClickListener(this);
+//        yolo_test.setOnClickListener(this);
 
         // 创建 FloatingPetView 实例并设置 MainActivity
-        floatingPetView = new FloatingPetView(this); // 这里的 this 是指当前的 MainActivity
+        floatingPetView = new FloatingPetView(this, getApplication()); // 这里的 this 是指当前的 MainActivity
 //        floatingPetView = new FloatingPetView(MainActivity.this, null); // 这里的 this 是指当前的 MainActivity
-        floatingPetView.setMainActivity(this); // 将 MainActivity 实例传递给 FloatingPetView
+//        floatingPetView.setMainActivity(this); // 将 MainActivity 实例传递给 FloatingPetView
+//        floatingPetView.setMainActivity(this); // 将 MainActivity 实例传递给 FloatingPetView
+
+
+//        viewPager = findViewById(R.id.view_pager);
+//        setupViewPager(viewPager);
+//
+//        tabLayout = findViewById(R.id.tab_layout);
+//        tabLayout.setupWithViewPager(viewPager);
     }
+
 
     /**
      * 加载R
      */
     private void initRv() {
         RVMainAdapter rvAdapter = mPresenter.getRVAdapter(this);
-        mRvMain.setLayoutManager(new LinearLayoutManager(this));
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 1);
+        mRvMain.setLayoutManager(gridLayoutManager);
         mRvMain.setAdapter(rvAdapter);
         mRvMain.addOnScrollListener(new HidingScrollListener() {
             @Override
@@ -137,7 +164,7 @@ public class MainActivity extends BaseActivity<MainVInterface, MainPresenter> im
     protected void findAllViewById() {
         mRvMain = $(R.id.rv_main);
 //        mFABSetting = $(R.id.fab_setting);
-        yolo_test = $(R.id.yolo_test);
+//        yolo_test = $(R.id.yolo_test);
     }
 
 //    @Override
@@ -190,20 +217,20 @@ public class MainActivity extends BaseActivity<MainVInterface, MainPresenter> im
 //        }
 
 
-//        测试调用yolo是否可行 【临时代码】
-        else if (viewId == R.id.yolo_test) {
-            System.out.println("单选按钮1点击！");
-            LogUtils.e("单选按钮1点击！");
-//            启动yoloMainActivity
-//            ncnn方式
-//            Intent intentYolo = new Intent(MainActivity.this, yoloMainActivity.class);
+////        测试调用yolo是否可行 【临时代码】
+//        else if (viewId == R.id.yolo_test) {
+//            System.out.println("单选按钮1点击！");
+//            LogUtils.e("单选按钮1点击！");
+////            启动yoloMainActivity
+////            ncnn方式
+////            Intent intentYolo = new Intent(MainActivity.this, yoloMainActivity.class);
+////            startActivity(intentYolo);
+//
+////            torchscript.ptl方式
+//            Intent intentYolo = new Intent(MainActivity.this, MainActivity2.class);
 //            startActivity(intentYolo);
-
-//            torchscript.ptl方式
-            Intent intentYolo = new Intent(MainActivity.this, MainActivity2.class);
-            startActivity(intentYolo);
-
-        }
+//
+//        }
 
     }
 
@@ -233,7 +260,7 @@ public class MainActivity extends BaseActivity<MainVInterface, MainPresenter> im
 
 //        以下为新添加
         // 调用显示悬浮窗的方法
-        new FloatingRefreshTask(getPackageManager(), (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE), getApplicationContext()).showFloatingWindow();
+        new FloatingRefreshTask(getPackageManager(), (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE), getApplicationContext(), getApplication()).showFloatingWindow();
 
     }
 

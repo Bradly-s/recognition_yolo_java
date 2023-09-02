@@ -25,6 +25,8 @@ public class AppConstants {
     public static final int INTRO_END_COLOR = R.color.lightOrange;
 
     public static final String REGEX_EMAIL = "^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$";
+    public static final String REGEX_PHONE = "^[1-9]\\d{10}$";
+
 
     public static String USER_NAME = null;
 

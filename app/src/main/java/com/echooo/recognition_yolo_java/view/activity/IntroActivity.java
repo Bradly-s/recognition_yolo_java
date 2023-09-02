@@ -130,32 +130,36 @@ public class IntroActivity extends BaseActivity<IntroVInterface, IntroPresenter>
             showRegisterDialog();
         } else if (viewId == R.id.tv_login) {
             dismissDialog();
-            mPresenter.login(mEtAccount.getText().toString(), mEtPsw.getText().toString());
+//            mPresenter.login(mEtAccount.getText().toString(), mEtPsw.getText().toString());
+            if(mEtAccount.getVisibility() == View.GONE){
+                mPresenter.login(viewId_phone.getText().toString(), viewId_captcha.getText().toString(), true);
+            }else {
+                mPresenter.login(mEtAccount.getText().toString(), mEtPsw.getText().toString(), false);
+            }
 //        } else if (viewId == R.id.tv_social_login) {
 //            // 处理 tv_social_login 的点击事件
         } else if (viewId == R.id.tv_phone_login) {
             // 处理 tv_phone_login 的点击事件
 //          todo:  手机号登录的时候，手机号、验证码框显示。精灵名、密码隐藏
             LogUtils.e("R.id.tv_phone_login");
-
-            viewId__psw = findViewById(R.id.et_account);
-            viewId_account = findViewById(R.id.et_psw);
-            viewId__psw.setVisibility(View.VISIBLE);
-            viewId__psw.setVisibility(View.VISIBLE);
-
-            viewId_phone = findViewById(R.id.et_phone);
-            viewId_captcha = findViewById(R.id.et_captcha);
-            // 设置 MaterialEditText 为可见
-            viewId_phone.setVisibility(View.VISIBLE);
-            viewId_captcha.setVisibility(View.VISIBLE);
-            showLoginDialog();
-
-
+            showPhoneLogin(view);
 
 
         } else if (viewId == R.id.tv_register) {
             mPresenter.register(mEtRAccount.getText().toString(), mEtRPhone.getText().toString(), mEtRPsw.getText().toString(), mEtRPswAgain.getText().toString());
         }
+    }
+
+    private void showPhoneLogin(View view) {
+        LogUtils.logWithMethodInfo();
+        mEtAccount.setVisibility(View.GONE);
+        mEtPsw.setVisibility(View.GONE);
+        LogUtils.logWithMethodInfo("okK");
+
+        // 设置 MaterialEditText 为可见
+        viewId_phone.setVisibility(View.VISIBLE);
+        viewId_captcha.setVisibility(View.VISIBLE);
+
     }
 
 
@@ -166,15 +170,20 @@ public class IntroActivity extends BaseActivity<IntroVInterface, IntroPresenter>
 
         mEtAccount = (MaterialEditText) loginDialog.findViewById(R.id.et_account);
         mEtPsw = (MaterialEditText) loginDialog.findViewById(R.id.et_psw);
-        mTvLogin = (TextView) loginDialog.findViewById(R.id.tv_login);
-//        mTvSocialLogin = (TextView) loginDialog.findViewById(R.id.tv_social_login);
+
+        viewId_phone = (MaterialEditText) loginDialog.findViewById(R.id.et_phone);
+        viewId_captcha = (MaterialEditText) loginDialog.findViewById(R.id.et_captcha);
+
+
         mTvPhoneLogin = (TextView) loginDialog.findViewById(R.id.tv_phone_login);
-        mTvLogin.setOnClickListener(this);
+        mTvLogin = (TextView) loginDialog.findViewById(R.id.tv_login);
+
 
 //        mTvSocialLogin.setOnClickListener(this);
         mTvPhoneLogin.setOnClickListener(this);
 
         mLoginDialog = DialogUtils.showCoustomDialog(this, loginDialog, "登录");
+        mTvLogin.setOnClickListener(this);
 
     }
 
@@ -234,6 +243,11 @@ public class IntroActivity extends BaseActivity<IntroVInterface, IntroPresenter>
     @Override
     public void errorEmailInvalid() {
         ToastUtil.showToast(this, getString(R.string.error_email_invalid));
+    }
+
+    @Override
+    public void errorPhoneInvalid() {
+        ToastUtil.showToast(this, getString(R.string.error_phone_invalid));
     }
 
     @Override

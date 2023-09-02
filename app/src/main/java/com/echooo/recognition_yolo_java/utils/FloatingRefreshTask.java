@@ -1,6 +1,7 @@
 package com.echooo.recognition_yolo_java.utils;
 
 import android.app.ActivityManager;
+import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
@@ -14,12 +15,14 @@ public class FloatingRefreshTask extends TimerTask {
     private PackageManager mPackageManager;
     private ActivityManager mActivityManager;
     private Context mContext;
+    private Application mApplication;
     private Handler handler = new Handler();
 
-    public FloatingRefreshTask(PackageManager packageManager, ActivityManager activityManager, Context context) {
+    public FloatingRefreshTask(PackageManager packageManager, ActivityManager activityManager, Context context, Application application) {
         mPackageManager = packageManager;
         mActivityManager = activityManager;
         mContext = context;
+        mApplication = application;
     }
 
     @Override
@@ -29,7 +32,7 @@ public class FloatingRefreshTask extends TimerTask {
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    FloatingPetManager.createPetWindow(mContext);
+                    FloatingPetManager.createPetWindow(mContext, mApplication);
                 }
             });
         }
@@ -47,7 +50,7 @@ public class FloatingRefreshTask extends TimerTask {
 
     public void showFloatingWindow() {
         if (FloatingUtils.isHome(mActivityManager, mPackageManager) && !FloatingPetManager.isFloatingWindowShowing()) {
-            FloatingPetManager.createPetWindow(mContext);
+            FloatingPetManager.createPetWindow(mContext, mApplication);
         }
     }
 

@@ -36,7 +36,7 @@ public class FloatingPetService extends Service {
         LogUtils.logWithMethodInfo();
         if (mTimer == null) {
             mTimer = new Timer();
-            mTimer.scheduleAtFixedRate(new FloatingRefreshTask(this.getPackageManager(), (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE), getApplicationContext()), 0, 500);
+            mTimer.scheduleAtFixedRate(new FloatingRefreshTask(this.getPackageManager(), (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE), getApplicationContext(), this.getApplication()), 0, 500);
         }
         return super.onStartCommand(intent, flags, startId);
     }

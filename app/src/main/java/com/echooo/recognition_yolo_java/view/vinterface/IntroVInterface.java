@@ -20,6 +20,7 @@ public interface IntroVInterface {
     void errorPswNotEqual();
 
     void errorEmailInvalid();
+    void errorPhoneInvalid();
 
     void errorUserNameRepeat();
 

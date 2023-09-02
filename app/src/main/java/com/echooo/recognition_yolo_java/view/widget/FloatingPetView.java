@@ -1,43 +1,31 @@
 package com.echooo.recognition_yolo_java.view.widget;
 
-import static androidx.core.app.ActivityCompat.startActivityForResult;
-
-import static com.echooo.recognition_yolo_java.yoloobjdetect.PrePostProcessor.nonMaxSuppression;
-
 import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
-import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.PixelFormat;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
-import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.view.ContextThemeWrapper;
-
+import com.echooo.recognition_yolo_java.PythonActivityNew;
 import com.echooo.recognition_yolo_java.R;
-import com.echooo.recognition_yolo_java.pythonProject.PythonExecutor;
 import com.echooo.recognition_yolo_java.utils.FloatingUtils;
 import com.echooo.recognition_yolo_java.utils.LogUtils;
-import com.echooo.recognition_yolo_java.view.activity.MainActivity;
-import com.echooo.recognition_yolo_java.yoloobjdetect.MainActivity2;
+//import com.echooo.recognition_yolo_java.view.activity.MainActivity;
+import com.echooo.recognition_yolo_java.view.activity.NewMainActivity;
 import com.echooo.recognition_yolo_java.yoloobjdetect.PrePostProcessor;
 import com.echooo.recognition_yolo_java.yoloobjdetect.Result;
 
@@ -53,9 +41,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 
 /**
@@ -119,19 +108,22 @@ public class FloatingPetView extends LinearLayout implements Runnable{
     private View expandableView;
 
     private static final int REQUEST_IMAGE_PICK = 101; // Arbitrary request code
-    private MainActivity mainActivity;
+//    private MainActivity mainActivity;
+    private NewMainActivity mainActivity;
     private Context mContext; // 添加这个成员变量
+    private Application mApplication;
 
     private Module mModule = null;
     private float mImgScaleX, mImgScaleY, mIvScaleX, mIvScaleY, mStartX, mStartY;
     private ProgressBar mProgressBar;
 
-    public FloatingPetView(Context context) {
+    public FloatingPetView(Context context, Application application) {
         super(context);
         mContext = context; // 初始化 mContext 成员变量
         initView(context);
         LogUtils.logWithMethodInfo();
 //        setMainActivity(mainActivity);
+        mApplication = application;
     }
 
     // 设置 Context 的方法
@@ -140,9 +132,13 @@ public class FloatingPetView extends LinearLayout implements Runnable{
     }
 
 
-    public void setMainActivity(MainActivity mainActivity) {
-        LogUtils.logWithMethodInfo("mainActivity:" + mainActivity);
-        this.mainActivity = mainActivity;
+//    public void setMainActivity2(MainActivity mainActivity) {
+//        LogUtils.logWithMethodInfo("mainActivity:" + mainActivity);
+//        this.mainActivity = mainActivity;
+//    }
+    public void setMainActivity(NewMainActivity newMainActivity) {
+        LogUtils.logWithMethodInfo("mainActivity:" + newMainActivity);
+        this.mainActivity = newMainActivity;
     }
 
     /**
@@ -382,7 +378,8 @@ public class FloatingPetView extends LinearLayout implements Runnable{
         LogUtils.logWithMethodInfo("mBitmap:" + mBitmap);
 
         try {
-            mModule = LiteModuleLoader.load(MainActivity.assetFilePath(mContext.getApplicationContext(), "yolov5s.torchscript.ptl"));
+//            mModule = LiteModuleLoader.load(MainActivity.assetFilePath(mContext.getApplicationContext(), "yolov5s.torchscript.ptl"));
+            mModule = LiteModuleLoader.load(NewMainActivity.assetFilePath(mContext.getApplicationContext(), "yolov5s.torchscript.ptl"));
             LogUtils.logWithMethodInfo("mModule:" + mModule);
             BufferedReader br = new BufferedReader(new InputStreamReader(mContext.getAssets().open("classes.txt")));
             LogUtils.logWithMethodInfo("br:" + br);
@@ -466,7 +463,8 @@ public class FloatingPetView extends LinearLayout implements Runnable{
         // 在这里设置处理结果文本
         resultTextView.setText(finalResult);
         processExpandableView();
-        processPython();
+//        todo ： 未完成，报错
+//        processPython(mContext);
 
 
 
@@ -480,20 +478,32 @@ public class FloatingPetView extends LinearLayout implements Runnable{
 //        });
     }
 
-    public void processPython() {
+    private Executor executor = Executors.newSingleThreadExecutor();
+
+    public void processPython(Context mContext) {
         LogUtils.logWithMethodInfo();
-        String scriptPath = "helloworld.py";  // 脚本文件名，不包含路径
-        try {
-            InputStream inputStream = mContext.getAssets().open(scriptPath);
+        Handler handler = new Handler(Looper.getMainLooper());
 
-            LogUtils.logWithMethodInfo("inputStream:" + inputStream);
-            String re = PythonExecutor.runScript(inputStream);
-            LogUtils.logWithMethodInfo(re);
+//        todo: 启动 PythonActivityNew
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                LogUtils.logWithMethodInfo("processPython中run()的mApplication：" + mApplication);
+                // 创建 Task 实例
+//                todo: [ getApplication ]
+                PythonActivityNew.Task task = new PythonActivityNew.Task(mApplication);
+                LogUtils.logWithMethodInfo("task:" + task);
 
-            LogUtils.logWithMethodInfo("runScript——after");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+                // 执行 Task 的 run 方法
+                // 在主线程上运行任务
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        task.run();
+                    }
+                });
+            }
+        });
     }
 
 
@@ -556,23 +566,24 @@ public class FloatingPetView extends LinearLayout implements Runnable{
 
     /** 原先的触摸方法：切换样式*/
     private void defaultPetStatus() {
-        switch (new Random().nextInt(5) + 3) {
-            case 3:
-                setPetImg(R.drawable.ic_face_03);
-                break;
-            case 4:
-                setPetImg(R.drawable.ic_face_04);
-                break;
-            case 5:
-                setPetImg(R.drawable.ic_face_05);
-                break;
-            case 6:
-                setPetImg(R.drawable.ic_face_06);
-                break;
-            case 7:
-                setPetImg(R.drawable.ic_face_07);
-                break;
-        }
+//        switch (new Random().nextInt(5) + 3) {
+//            case 3:
+//                setPetImg(R.drawable.ic_face_03);
+//                break;
+//            case 4:
+//                setPetImg(R.drawable.ic_face_04);
+//                break;
+//            case 5:
+//                setPetImg(R.drawable.ic_face_05);
+//                break;
+//            case 6:
+//                setPetImg(R.drawable.ic_face_06);
+//                break;
+//            case 7:
+//                setPetImg(R.drawable.ic_face_07);
+//                break;
+//        }
+        setPetImg(R.drawable.play);
     }
 
     /**

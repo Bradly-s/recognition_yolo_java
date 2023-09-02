@@ -44,13 +44,17 @@ public class IntroPresenter extends BasePresenter<IntroVInterface> {
         return new ParallaxTransformer(AppConstants.PARALLAX_COEFFICIENT, AppConstants.DISTANCE_COEFFICIENT, mModel.getLayoutViewIdsMap());
     }
 
-    public void login(final String userName, String psw) {
-        if (userName.isEmpty() || psw.isEmpty()) {
+    /**flag： true：手机号登录
+     *        false：小精灵名称登录
+    * */
+    public void login(final String userInfo1, String userInfo2, Boolean flag) {
+        if (userInfo1.isEmpty() || userInfo2.isEmpty()) {
             view.errorEmptyInfo();
         } else {
             view.showProgressDialog();
-            if (userName != null) {
-                view.loginSuccess(userName);
+//            todo: 根据flag判断用户是手机号登录or用户名登录，若是手机号登录，则查找用户该手机号对应的用户名
+            if (userInfo1 != null) {
+                view.loginSuccess(userInfo1);
             } else {
                 view.errorLoginFail();
             }
@@ -69,17 +73,53 @@ public class IntroPresenter extends BasePresenter<IntroVInterface> {
 
     }
 
-    public void register(final String userName, String email, String psw, String pswAgain) {
-        if (userName.isEmpty() || email.isEmpty() || psw.isEmpty() || pswAgain.isEmpty()) {
-            view.errorEmptyInfo();
-        } else if (!psw.equals(pswAgain)) {
-            view.errorPswNotEqual();
-        } else if (!Pattern.compile(AppConstants.REGEX_EMAIL).matcher(email).find()) {
-            view.errorEmailInvalid();
-        } else {
-            view.showProgressDialog();
+//    public void register(final String userName, String email, String psw, String pswAgain) {
+//        if (userName.isEmpty() || email.isEmpty() || psw.isEmpty() || pswAgain.isEmpty()) {
+//            view.errorEmptyInfo();
+//        } else if (!psw.equals(pswAgain)) {
+//            view.errorPswNotEqual();
+//        } else if (!Pattern.compile(AppConstants.REGEX_EMAIL).matcher(email).find()) {
+//            view.errorEmailInvalid();
+//        } else {
+//            view.showProgressDialog();
+//
+//            view.registerSuccess(userName);
+//
+////            AVOSUtils.signUp(userName, psw, email, new SignUpCallback() {
+////                @Override
+////                public void done(AVException e) {
+////                    view.dismissDialog();
+////                    if (e == null) {
+////                        view.registerSuccess(userName);
+////                    } else {
+////                        switch (e.getCode()) {
+////                            case 202:
+////                                view.errorUserNameRepeat();
+////                                break;
+////                            case 203:
+////                                view.errorEmailRepeat();
+////                                break;
+////                            default:
+////                                view.errorNetWork();
+////                                break;
+////                        }
+////                    }
+////                }
+////            });
+//        }
+//
+//    }
+public void register(final String userName, String phone, String psw, String pswAgain) {
+    if (userName.isEmpty() || phone.isEmpty() || psw.isEmpty() || pswAgain.isEmpty()) {
+        view.errorEmptyInfo();
+    } else if (!psw.equals(pswAgain)) {
+        view.errorPswNotEqual();
+    } else if (!Pattern.compile(AppConstants.REGEX_PHONE).matcher(phone).find()) {
+        view.errorPhoneInvalid();
+    } else {
+        view.showProgressDialog();
 
-            view.registerSuccess(userName);
+        view.registerSuccess(userName);
 
 //            AVOSUtils.signUp(userName, psw, email, new SignUpCallback() {
 //                @Override
@@ -102,7 +142,8 @@ public class IntroPresenter extends BasePresenter<IntroVInterface> {
 //                    }
 //                }
 //            });
-        }
-
     }
+
+}
+
 }

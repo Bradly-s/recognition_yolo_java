@@ -3,6 +3,7 @@ package com.echooo.recognition_yolo_java.utils;
 import static androidx.core.app.ActivityCompat.startActivityForResult;
 import static com.echooo.recognition_yolo_java.utils.ToastUtil.showToast;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
@@ -43,7 +44,7 @@ public class FloatingPetManager {
      *
      * @param context
      */
-    public static void createPetWindow(Context context) {
+    public static void createPetWindow(Context context, Application application) {
         LogUtils.logWithMethodInfo();
         // 在Activity中动态请求悬浮窗口权限
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(context)) {
@@ -57,7 +58,7 @@ public class FloatingPetManager {
             int screenWidth = windowManager.getDefaultDisplay().getWidth();
             int screenHeight = windowManager.getDefaultDisplay().getHeight();
             if (mFPetView == null) {
-                mFPetView = new FloatingPetView(context);
+                mFPetView = new FloatingPetView(context, application);
 //                mFPetView = new FloatingPetView(context, null);
                 if (mParams == null) {
                     mParams = new WindowManager.LayoutParams();

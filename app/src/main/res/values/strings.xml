@@ -17,6 +17,7 @@
     <string name="error_empty_info">信息不可为空</string>
     <string name="error_psw_not_equal">两次输入密码不相同</string>
     <string name="error_email_invalid">请输入正确的邮箱</string>
+    <string name="error_phone_invalid">请输入正确的手机号</string>
     <string name="tips_net_working">网络连接中，请稍候</string>
     <string name="error_username_repeat">小精灵名已存在</string>
     <string name="error_email_repeat">邮箱已被注册</string>
@@ -37,6 +38,7 @@
     <string name="restart">Restart</string>
     <string name="select">Select</string>
     <string name="live">Live</string>
+    <string name="welcome_person">欢迎您使用</string>
 
     <array name="array_intro_tips">
         <item>@string/intro_first</item>
@@ -44,5 +46,11 @@
         <item>@string/intro_third</item>
         <item>@string/intro_fourth</item>
     </array>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_fragment1">Hello  fragment1</string>
+    <string name="hello_fragment2">Hello fragment2</string>
+    <string name="hello_fragment3">Hello fragment3</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

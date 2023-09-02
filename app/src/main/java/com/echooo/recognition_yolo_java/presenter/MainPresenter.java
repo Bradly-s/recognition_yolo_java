@@ -31,7 +31,9 @@ public class MainPresenter extends BasePresenter<MainVInterface> {
 
     public MainPresenter(MainVInterface viewInterface) {
         super(viewInterface);
+        LogUtils.logWithMethodInfo("这是问题？？----------------------------------------------------------");
         mModel = new MainModel();
+        LogUtils.logWithMethodInfo("这是问题？？+++++++++++++++++++++++++++++++++++++++++++++++");
     }
 
     /**
@@ -42,6 +44,8 @@ public class MainPresenter extends BasePresenter<MainVInterface> {
      */
     public RVMainAdapter getRVAdapter(final Context context) {
         RVMainAdapter adapter = new RVMainAdapter(context, mModel.getPetData());
+        LogUtils.logWithMethodInfo("adapter:" + adapter);
+        LogUtils.logWithMethodInfo("mModel.getPetData().get(0).getName():" + mModel.getPetData().get(0).getName());
         adapter.setOnRvItemClickListener(new RVMainAdapter.OnRvItemClickListener() {
             @Override
             public void onItemClick(View view, PetInfo petInfo) {
@@ -78,6 +82,7 @@ public class MainPresenter extends BasePresenter<MainVInterface> {
 
 
     public ItemTouchHelper getItemTouchHelper(final RVMainAdapter adapter) {
+        LogUtils.logWithMethodInfo();
         return new ItemTouchHelper(new ItemTouchHelper.Callback() {
 
             @Override
