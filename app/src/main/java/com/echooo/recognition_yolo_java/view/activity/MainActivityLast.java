@@ -1,5 +1,7 @@
 package com.echooo.recognition_yolo_java.view.activity;
 
+import static com.echooo.recognition_yolo_java.utils.FloatingPetManager.CODE_WINDOW;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -8,11 +10,14 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.Toast;
@@ -43,6 +48,7 @@ import androidx.appcompat.widget.SwitchCompat;
 
 public class MainActivityLast extends AppCompatActivity implements Fragment1.OnSwitchChangeListener {
 
+    private static final int REQUEST_CODE = 123;
     private FloatingPetView floatingPetView;
     private View rootView;
 
@@ -61,9 +67,6 @@ public class MainActivityLast extends AppCompatActivity implements Fragment1.OnS
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_main);
 
-//        todo : 如何获取fragment1中的 开关，点击按钮的时候调用launchDesktopPet函数？？
-        // 获取SwitchCompat组件
-
         viewPager = findViewById(R.id.view_pager);
         setupViewPager(viewPager);
 
@@ -73,49 +76,15 @@ public class MainActivityLast extends AppCompatActivity implements Fragment1.OnS
         // 获取Fragment1的实例
         // 获取ViewPager的适配器
         ViewPagerAdapter adapterMY = (ViewPagerAdapter) viewPager.getAdapter();
-
         // 获取Fragment1的实例
         fragment1 = (Fragment1) adapterMY.getItem(0);
         LogUtils.logWithMethodInfo("fragment1：" + myFragment);
-//
-//        // 检查Fragment1是否成功获取
-//        if (myFragment != null) {
-//            // 获取Fragment1中的按钮
-//            switchCompat = myFragment.requireView().findViewById(R.id.sw_select);
-//            LogUtils.logWithMethodInfo("switchCompat");
-//            // 设置开关的状态变化监听器
-//            switchCompat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//                @Override
-//                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                    if (isChecked) {
-//                        // SwitchCompat被选中时执行的操作
-//                        launchDesktopPet();
-//                    } else {
-//                        // SwitchCompat被取消选中时执行的操作
-//                        // 如果有需要的话，可以在此处添加相应的操作
-//                    }
-//                }
-//            });
-//        }
-
-
-
-
-        // 创建 FloatingPetView 实例并设置 MainActivity
         // 设置SwitchCompat的状态更改监听器
         fragment1.setOnSwitchChangeListener(this);
 
         floatingPetView = new FloatingPetView(MainActivityLast.this, this.getApplication()); // 这里的 this 是指当前的 MainActivity
-//        floatingPetView = new FloatingPetView(MainActivity.this, null); // 这里的 this 是指当前的 MainActivity
         floatingPetView.setMainActivity(this); // 将 MainActivity 实例传递给 FloatingPetView
 
-//        if (!Python.isStarted()){
-//            LogUtils.logWithMethodInfo("!Python.isStarted()");
-//            Python.start(new AndroidPlatform(this));
-//        }
-//        Python python=Python.getInstance();
-//        PyObject pyObject=python.getModule("helloworld");
-//        pyObject.callAttr("sayHello");
 
     }
 
@@ -124,7 +93,34 @@ public class MainActivityLast extends AppCompatActivity implements Fragment1.OnS
     public void onSwitchChanged(boolean isChecked) {
         if (isChecked) {
             // SwitchCompat被选中时执行的操作
-            launchDesktopPet();
+            getPerssion();
+//            launchDesktopPet();
+        } else {
+//            关闭悬浮窗
+            closeDesktopPet();
+        }
+    }
+
+    /**在此处判断是否授予权限，然后再启动悬浮窗
+     * */
+    public void getPerssion(){
+        LogUtils.logWithMethodInfo();
+        // 申请悬浮窗权限
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (!Settings.canDrawOverlays(this)) {
+                Toast.makeText(this, "请打开此应用悬浮窗权限", Toast.LENGTH_SHORT).show();
+                LogUtils.logWithMethodInfo("请打开此应用悬浮窗权限");
+                //【 提示"请打开此应用悬浮窗权限"后进入桌面，应用变为了后台 】
+//                startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName())), REQUEST_CODE);
+
+                //【 提示"请打开此应用悬浮窗权限"后进入桌面，应用变为了后台,再次打开应用即进入权限设置界面 】
+                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + MainActivityLast.this.getPackageName()));
+//                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);//为待启动的Activity指定FLAG_ACTIVITY_NEW_TASK标记位。[ 加上会不起作用  ]
+                startActivityForResult(intent, REQUEST_CODE);
+            }else {
+                LogUtils.logWithMethodInfo("已经获得权限，则直接启动悬浮窗");
+                launchDesktopPet();
+            }
         }
     }
 
@@ -139,6 +135,7 @@ public class MainActivityLast extends AppCompatActivity implements Fragment1.OnS
         Intent intent = new Intent(MainActivityLast.this, FloatingPetService.class);
         startService(intent);
 
+
         Intent home = new Intent(Intent.ACTION_MAIN);
         home.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         home.addCategory(Intent.CATEGORY_HOME);
@@ -146,14 +143,19 @@ public class MainActivityLast extends AppCompatActivity implements Fragment1.OnS
 
 //        以下为新添加
         // 调用显示悬浮窗的方法
-        new FloatingRefreshTask(getPackageManager(), (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE), getApplicationContext(), getApplication()).showFloatingWindow();
+//        new FloatingRefreshTask(getPackageManager(), (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE), getApplicationContext(), getApplication()).showFloatingWindow();
 
     }
 
+    //    关闭悬浮窗
+    public void closeDesktopPet() {
+        LogUtils.logWithMethodInfo("调用成功啦！！");
 
+//        new FloatingRefreshTask(getPackageManager(), (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE), getApplicationContext(), getApplication()).closeFloatingWindow();
 
-
-
+        Intent intent = new Intent(MainActivityLast.this, FloatingPetService.class);
+        stopService(intent);
+    }
 
 
     private void showToast(String message) {
@@ -235,6 +237,38 @@ public class MainActivityLast extends AppCompatActivity implements Fragment1.OnS
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         LogUtils.logWithMethodInfo();
+
+        if (requestCode == REQUEST_CODE) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Settings.canDrawOverlays(this)) {
+                // 用户已经授予悬浮窗权限，可以执行需要权限的操作
+                LogUtils.logWithMethodInfo("用户已经授予悬浮窗权限");
+                launchDesktopPet();
+            } else {
+                // 用户未授予悬浮窗权限，可以给出提示或采取其他操作
+                LogUtils.logWithMethodInfo("用户未授予悬浮窗权限");
+                // 用户未授予悬浮窗权限，给出提示
+                Toast.makeText(this, "请授予悬浮窗权限以继续使用应用", Toast.LENGTH_SHORT).show();
+
+                // 退出应用
+                finishAffinity(); // 关闭当前 Activity 和所有相关的 Activity
+//                System.exit(0); // 退出应用的其他进程 【注释该行代码，可以让用户看到上边的提示】
+            }
+        }
+
+//        switch (requestCode) {
+//            // 不给权限就退出
+//            case CODE_WINDOW:
+//                LogUtils.logWithMethodInfo("CODE_WINDOW:" + CODE_WINDOW);
+//                if (resultCode != Activity.RESULT_OK) {
+//                    LogUtils.logWithMethodInfo("resultCode != Activity.RESULT_OK;resultCode:" + resultCode + ";Activity.RESULT_OK:" + Activity.RESULT_OK);
+//                    System.exit(0);
+//                }
+//                break;
+//            default:
+//                LogUtils.logWithMethodInfo("default");
+//                Toast.makeText(this, "未知权限回调: " + requestCode, Toast.LENGTH_SHORT).show();
+//        }
+
 
         if (requestCode == IMAGE_PICK_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
             LogUtils.logWithMethodInfo("requestCode:" + requestCode + ",IMAGE_PICK_REQUEST_CODE:" + IMAGE_PICK_REQUEST_CODE);

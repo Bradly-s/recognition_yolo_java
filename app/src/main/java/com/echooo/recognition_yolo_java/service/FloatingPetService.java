@@ -35,6 +35,7 @@ public class FloatingPetService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         LogUtils.logWithMethodInfo();
         if (mTimer == null) {
+            LogUtils.logWithMethodInfo("mTimer == null");
             mTimer = new Timer();
             mTimer.scheduleAtFixedRate(new FloatingRefreshTask(this.getPackageManager(), (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE), getApplicationContext(), this.getApplication()), 0, 500);
         }
@@ -44,8 +45,19 @@ public class FloatingPetService extends Service {
     @Override
     public void onDestroy() {
         LogUtils.logWithMethodInfo();
-        mTimer.cancel();
-        mTimer = null;
+        if(mTimer != null){
+            mTimer.cancel();
+            FloatingRefreshTask.closeFloatingWindow(); // 在取消定时器时关闭悬浮窗
+            mTimer = null;
+        }
+
         super.onDestroy();
     }
+//    @Override
+//    public void onDestroy() {
+//        LogUtils.logWithMethodInfo();
+//        mTimer.cancel();
+//        mTimer = null;
+//        super.onDestroy();
+//    }
 }

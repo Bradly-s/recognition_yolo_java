@@ -23,7 +23,6 @@ import android.widget.TextView;
 import com.chaquo.python.PyObject;
 import com.chaquo.python.Python;
 import com.chaquo.python.android.AndroidPlatform;
-import com.echooo.recognition_yolo_java.PythonActivityNew;
 import com.echooo.recognition_yolo_java.R;
 import com.echooo.recognition_yolo_java.utils.FloatingUtils;
 import com.echooo.recognition_yolo_java.utils.LogUtils;
@@ -46,7 +45,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -54,7 +52,7 @@ import java.util.concurrent.Executors;
 /**
  * Created by Goo on 2016-9-18.
  */
-public class FloatingPetView extends LinearLayout implements Runnable{
+public class FloatingPetView extends LinearLayout implements Runnable {
     /**
      * 窗体宽高
      */
@@ -86,6 +84,8 @@ public class FloatingPetView extends LinearLayout implements Runnable{
      */
     private float xInView, yInView, xDownInScreen, yDownInScreen, xInScreen, yInScreen;
 
+    Boolean moveFlag = false;
+
     /**
      * 是否按住状态
      */
@@ -107,12 +107,13 @@ public class FloatingPetView extends LinearLayout implements Runnable{
     private ValueAnimator mMovingAnim;
 
     /**
-     * 收缩界面*/
+     * 收缩界面
+     */
     private boolean isExpanded = false;
     private View expandableView;
 
     private static final int REQUEST_IMAGE_PICK = 101; // Arbitrary request code
-//    private MainActivity mainActivity;
+    //    private MainActivity mainActivity;
 //    private NewMainActivity mainActivity;
     private MainActivityLast mainActivity;
     private Context mContext; // 添加这个成员变量
@@ -139,7 +140,7 @@ public class FloatingPetView extends LinearLayout implements Runnable{
     }
 
 
-//    public void setMainActivity2(MainActivity mainActivity) {
+    //    public void setMainActivity2(MainActivity mainActivity) {
 //        LogUtils.logWithMethodInfo("mainActivity:" + mainActivity);
 //        this.mainActivity = mainActivity;
 //    }
@@ -169,10 +170,10 @@ public class FloatingPetView extends LinearLayout implements Runnable{
 
 
     /**
-     *          初始化可收缩布局
+     * 初始化可收缩布局
      *          todo:  调整为结果显示界面
-     *          */
-    public void initExpandableView(Context context){
+     */
+    public void initExpandableView(Context context) {
 //        LayoutInflater inflater = LayoutInflater.from(context);
 //        expandableView = inflater.inflate(R.layout.layout_expandable_view, this, false);
 //
@@ -237,12 +238,16 @@ public class FloatingPetView extends LinearLayout implements Runnable{
         float y = event.getRawY();
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                moveFlag = false;
                 xInScreen = x;
                 yInScreen = y;
                 xInView = event.getX();
                 yInView = event.getY();
                 break;
             case MotionEvent.ACTION_MOVE:
+                isPressed = false;
+                moveFlag = false;
+
                 // 计算悬浮窗的偏移量
                 int offsetX = (int) (x - xInScreen);
                 int offsetY = (int) (y - yInScreen);
@@ -277,6 +282,11 @@ public class FloatingPetView extends LinearLayout implements Runnable{
                 // 更新悬浮窗的位置
                 mWindowManager.updateViewLayout(FloatingPetView.this, mParams);
 
+//                if(x != xInScreen && y != yInScreen){
+                if(y != yInScreen){
+                    moveFlag = true;
+                }
+
                 // 更新触摸起始点
                 xInScreen = x;
                 yInScreen = y;
@@ -284,35 +294,39 @@ public class FloatingPetView extends LinearLayout implements Runnable{
             case MotionEvent.ACTION_UP:
 //                break;
                 isPressed = false;
+//                 获取 手指拿起时的坐标。比较 按下 与 拿起坐标是否相同
+//                event.getRawY();
+//                xDownInScreen = event.getX();
+                xDownInScreen = event.getRawX();
+                yDownInScreen = event.getRawY();
 
-                if (xDownInScreen == xInScreen && yDownInScreen == yInScreen) {
+//                if (xDownInScreen == xInScreen && yDownInScreen == yInScreen ) {  // 正确的
+                if (xDownInScreen == xInScreen && yDownInScreen == yInScreen && (!moveFlag)) {
                     //触摸坐标不变，即点击事件
                     try {
                         LogUtils.logWithMethodInfo("触摸坐标不变，即点击事件");
+                        isPressed = true;
                         updatePetState();
+
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
-                } else if (xInScreen < screenWidth / 8) {  //当在这个位置放手时宠物贴边隐藏
-                    hideLeft();
-                } else if (xInScreen > screenWidth * 7 / 8) {
-                    hideRight();
-                    break;
+                    moveFlag = false;
                 }
                 else {
 //                    更新状态
                     try {
-                        LogUtils.logWithMethodInfo("更新状态");
+                        LogUtils.logWithMethodInfo("更新 移动 状态");
+                        isPressed = false;
                         updatePetState();
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 }
+                break;
         }
         return true;
     }
-
-
 
 
     /**
@@ -335,28 +349,29 @@ public class FloatingPetView extends LinearLayout implements Runnable{
     private void updatePetState() throws IOException {
         if (isPressed) {
             //按住状态
+            LogUtils.logWithMethodInfo("按住状态");
             touchPetStatus();
-        } else if (isNeedHide) {
-            //没有按住，需要贴边，贴边即可
-//            新加上的（自动贴边）
-            hideRight();
-        } else {
-            //没有按住，也不需要贴边，默认状态即可
-//            todo: 点击的时候，选择本地图片，然后调用yolo算法，将结果显示在可收缩的界面上，并展开该收缩界面
-            LogUtils.logWithMethodInfo("上传图片，处理算法");
             processYolo();
-
-
+            moveFlag = false;
         }
+//        else if (isNeedHide) {
+//            //没有按住，需要贴边，贴边即可
+////            新加上的（自动贴边）
+//            hideRight();
+//        } else {
+//            //没有按住，也不需要贴边，默认状态即可
+////             点击的时候，选择本地图片，然后调用yolo算法，将结果显示在可收缩的界面上，并展开该收缩界面
+//            LogUtils.logWithMethodInfo("上传图片，处理算法");
+////            processYolo();
+//
+//        }
     }
 
 
-
-
     /**
-    *   原先：选择本地图片，然后调用yolo算法，将结果显示在可收缩的界面上，并展开该收缩界面
-     *   改为：调用算法识别项目中的图片，将结果显示在可收缩的界面上，并展开该收缩界面
-    * */
+     * 原先：选择本地图片，然后调用yolo算法，将结果显示在可收缩的界面上，并展开该收缩界面
+     * 改为：调用算法识别项目中的图片，将结果显示在可收缩的界面上，并展开该收缩界面
+     */
     private String[] mTestImages = {"test1.png"};
     private Bitmap mBitmap = null;
 
@@ -380,6 +395,7 @@ public class FloatingPetView extends LinearLayout implements Runnable{
             onFinishListener.onFinishRequested();
         }
     }
+
     public void processYolo() throws IOException {
         LogUtils.logWithMethodInfo();
 
@@ -431,22 +447,22 @@ public class FloatingPetView extends LinearLayout implements Runnable{
         LogUtils.logWithMethodInfo("————————————————————————————————————————————————————————————————————");
 
 //        processAngle(mImgScaleX, mImgScaleY, mIvScaleX, mIvScaleY, mStartX, mStartY);
-        mImgScaleX = (float)mBitmap.getWidth() / PrePostProcessor.mInputWidth;
-        mImgScaleY = (float)mBitmap.getHeight() / PrePostProcessor.mInputHeight;
+        mImgScaleX = (float) mBitmap.getWidth() / PrePostProcessor.mInputWidth;
+        mImgScaleY = (float) mBitmap.getHeight() / PrePostProcessor.mInputHeight;
         float mImageViewWidth = 1080.0F;
         float mImageViewHeight = 1080.0F;
 
         mIvScaleX = (mBitmap.getWidth() > mBitmap.getHeight() ? mImageViewWidth / mBitmap.getWidth() : mImageViewHeight / mBitmap.getHeight());
-        mIvScaleY  = (mBitmap.getHeight() > mBitmap.getWidth() ? mImageViewHeight / mBitmap.getHeight() : mImageViewWidth / mBitmap.getWidth());
+        mIvScaleY = (mBitmap.getHeight() > mBitmap.getWidth() ? mImageViewHeight / mBitmap.getHeight() : mImageViewWidth / mBitmap.getWidth());
 
-        mStartX = (mImageViewWidth - mIvScaleX * mBitmap.getWidth())/2;
-        mStartY = (mImageViewHeight -  mIvScaleY * mBitmap.getHeight())/2;
+        mStartX = (mImageViewWidth - mIvScaleX * mBitmap.getWidth()) / 2;
+        mStartY = (mImageViewHeight - mIvScaleY * mBitmap.getHeight()) / 2;
         LogUtils.logWithMethodInfo("mImgScaleX:" + mImgScaleX);
         LogUtils.logWithMethodInfo("mImgScaleY:" + mImgScaleY);
         LogUtils.logWithMethodInfo("====================================================================");
 
         //
-        final ArrayList<Result> results =  PrePostProcessor.outputsToNMSPredictions(outputs, mImgScaleX, mImgScaleY, mIvScaleX, mIvScaleY, mStartX, mStartY);
+        final ArrayList<Result> results = PrePostProcessor.outputsToNMSPredictions(outputs, mImgScaleX, mImgScaleY, mIvScaleX, mIvScaleY, mStartX, mStartY);
 //        final ArrayList<Result> results =  PrePostProcessor.outputsToNMSPredictions2(outputs, mImgScaleX, mImgScaleY, mIvScaleX, mIvScaleY, mStartX, mStartY);
 
         LogUtils.logWithMethodInfo("inputTensor:" + inputTensor);
@@ -473,13 +489,14 @@ public class FloatingPetView extends LinearLayout implements Runnable{
 
 //        将结果存入字典，写入收缩界面
         TextView resultTextView = expandableView.findViewById(R.id.contract);
+        //         完成，
+        String pythonResult = processPythonNew();
+        String resultAll = finalResult + "\n" + pythonResult;
+        LogUtils.logWithMethodInfo("resultAll:" + resultAll);
         // 在这里设置处理结果文本
-        resultTextView.setText(finalResult);
+//        resultTextView.setText(finalResult);
+        resultTextView.setText(resultAll);
         processExpandableView();
-//        todo ： 未完成，报错
-//        processPython(mContext);
-        processPythonNew();
-
 
 
 //        runOnUiThread(() -> {
@@ -492,61 +509,37 @@ public class FloatingPetView extends LinearLayout implements Runnable{
 //        });
     }
 
-    public void processPythonNew() {
+    public String processPythonNew() {
         LogUtils.logWithMethodInfo("processPythonNew");
-//        mainActivityLast.getApplicationContext();
-//        if (!Python.isStarted()){
-//            LogUtils.logWithMethodInfo("!Python.isStarted()");
-////            Python.start(new AndroidPlatform(mContext.getApplicationContext()));
-//            Python.start(new AndroidPlatform(mContext));
-//        }
-//        Python python=Python.getInstance();
-//        PyObject pyObject=python.getModule("helloworld");
+        //调用python文件，输出helloworld
+
+        if (!Python.isStarted()) {
+            LogUtils.logWithMethodInfo("!Python.isStarted()");
+            Python.start(new AndroidPlatform(mContext));
+        }
+        Python python = Python.getInstance();
+
+        PyObject pyObject = python.getModule("helloworld").callAttr("sayHello");
 //        pyObject.callAttr("sayHello");
+//        Integer result = pyObject.toJava(Integer.class);
+        String result = pyObject.toJava(String.class);
+        LogUtils.logWithMethodInfo("result:" + result);
 
+        return result;
     }
 
-    private Executor executor = Executors.newSingleThreadExecutor();
+    public void processAngle(float mImgScaleX, float mImgScaleY, float mIvScaleX, float mIvScaleY, float mStartX, float mStartY) {
 
-    public void processPython(Context mContext) {
-        LogUtils.logWithMethodInfo();
-        Handler handler = new Handler(Looper.getMainLooper());
-
-//        todo: 启动 PythonActivityNew
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                LogUtils.logWithMethodInfo("processPython中run()的mApplication：" + mApplication);
-                // 创建 Task 实例
-//                todo: [ getApplication ]
-                PythonActivityNew.Task task = new PythonActivityNew.Task(mApplication);
-                LogUtils.logWithMethodInfo("task:" + task);
-
-                // 执行 Task 的 run 方法
-                // 在主线程上运行任务
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        task.run();
-                    }
-                });
-            }
-        });
-    }
-
-
-    public void processAngle( float mImgScaleX,float mImgScaleY,float mIvScaleX,float mIvScaleY,float mStartX,float mStartY){
-
-        mImgScaleX = (float)mBitmap.getWidth() / PrePostProcessor.mInputWidth;
-        mImgScaleY = (float)mBitmap.getHeight() / PrePostProcessor.mInputHeight;
+        mImgScaleX = (float) mBitmap.getWidth() / PrePostProcessor.mInputWidth;
+        mImgScaleY = (float) mBitmap.getHeight() / PrePostProcessor.mInputHeight;
         float mImageViewWidth = 1080.0F;
         float mImageViewHeight = 1080.0F;
 
         mIvScaleX = (mBitmap.getWidth() > mBitmap.getHeight() ? mImageViewWidth / mBitmap.getWidth() : mImageViewHeight / mBitmap.getHeight());
-        mIvScaleY  = (mBitmap.getHeight() > mBitmap.getWidth() ? mImageViewHeight / mBitmap.getHeight() : mImageViewWidth / mBitmap.getWidth());
+        mIvScaleY = (mBitmap.getHeight() > mBitmap.getWidth() ? mImageViewHeight / mBitmap.getHeight() : mImageViewWidth / mBitmap.getWidth());
 
-        mStartX = (mImageViewWidth - mIvScaleX * mBitmap.getWidth())/2;
-        mStartY = (mImageViewHeight -  mIvScaleY * mBitmap.getHeight())/2;
+        mStartX = (mImageViewWidth - mIvScaleX * mBitmap.getWidth()) / 2;
+        mStartY = (mImageViewHeight - mIvScaleY * mBitmap.getHeight()) / 2;
     }
 
 
@@ -566,10 +559,10 @@ public class FloatingPetView extends LinearLayout implements Runnable{
     }
 
 
-
     /**
-     * 判断是否要展开*/
-    public void processExpandableView(){
+     * 判断是否要展开
+     */
+    public void processExpandableView() {
         LogUtils.logWithMethodInfo();
         if (isExpanded) {
             collapseExpandableView();
@@ -579,20 +572,25 @@ public class FloatingPetView extends LinearLayout implements Runnable{
     }
 
     /**
-     * 展开界面*/
+     * 展开界面
+     */
     private void expandExpandableView() {
         expandableView.setVisibility(View.VISIBLE);
         isExpanded = true;
     }
 
     /**
-     * 收缩界面*/
+     * 收缩界面
+     */
     private void collapseExpandableView() {
         expandableView.setVisibility(View.GONE);
         isExpanded = false;
+        defaultPetStatus();
     }
 
-    /** 原先的触摸方法：切换样式*/
+    /**
+     * 原先的触摸方法：切换样式
+     */
     private void defaultPetStatus() {
 //        switch (new Random().nextInt(5) + 3) {
 //            case 3:
@@ -618,7 +616,9 @@ public class FloatingPetView extends LinearLayout implements Runnable{
      * 按住（拎起）状态，随机更换表情
      */
     private void touchPetStatus() {
-        setPetImg(R.drawable.ic_face_02);
+        LogUtils.logWithMethodInfo("按住（拎起）状态");
+//        setPetImg(R.drawable.ic_face_02);
+        setPetImg(R.drawable.pause);
     }
 
     /**

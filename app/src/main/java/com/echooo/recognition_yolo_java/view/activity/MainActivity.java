@@ -17,7 +17,6 @@ import com.echooo.recognition_yolo_java.view.fragment.Fragment1;
 import com.echooo.recognition_yolo_java.view.fragment.Fragment2;
 import com.echooo.recognition_yolo_java.view.fragment.Fragment3;
 import com.echooo.recognition_yolo_java.yoloobjdetect.MainActivity2;
-import com.echooo.recognition_yolo_java.yolov5ncnn.yoloMainActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 //import android.support.v7.widget.LinearLayoutManager;
 //import android.support.v7.widget.RecyclerView;
