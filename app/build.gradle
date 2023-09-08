@@ -23,14 +23,26 @@ android {
         }
         ndk {      //添加这个，这个是打包时指定的abi类型
             abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+//            abiFilters "armeabi-v7a"
         }
         signingConfig signingConfigs.debug
+//        signingConfig signingConfigs.release
 
         python {
 //            version "3.8"
             buildPython "D:/softs/miniconda3/envs/qtpy/python.exe"
         }
     }
+
+    //    //签名
+//    signingConfigs {
+//        release {
+//            storeFile file("D:/android/key/1.jks")
+//            storePassword "111111"
+//            keyAlias "key0"
+//            keyPassword "222222"
+//        }
+//    }
 
     buildTypes {
         release {
@@ -40,7 +52,45 @@ android {
 
             shrinkResources true
         }
+//        debug {
+//            // 显示Log
+//            buildConfigField "boolean", "LOG_DEBUG", "true"
+//            //混淆
+//            minifyEnabled true
+//            //Zipalign优化
+//            zipAlignEnabled true
+//            // 移除无用的resource文件
+//            shrinkResources true
+//            //加载默认混淆配置文件
+//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+//            //签名
+//            signingConfig signingConfigs.debug
+//        }
+//        release {
+//            // 不显示Log
+//            buildConfigField "boolean", "LOG_DEBUG", "false"
+//            //混淆
+//            minifyEnabled true
+//            //Zipalign优化
+//            zipAlignEnabled true
+//            // 移除无用的resource文件
+//            shrinkResources true
+//            //加载默认混淆配置文件
+//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+//            //签名
+//            signingConfig signingConfigs.release
+//        }
     }
+
+//    buildFeatures {
+//        buildConfig true
+//    }
+//    lint {
+//        baseline = file("lint-baseline.xml")
+//    }
+
+
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8

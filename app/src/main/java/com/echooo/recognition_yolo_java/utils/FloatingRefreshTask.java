@@ -27,7 +27,7 @@ public class FloatingRefreshTask extends TimerTask {
 
     @Override
     public void run() {
-        LogUtils.logWithMethodInfo();
+//        LogUtils.logWithMethodInfo();
 //       第二次打开悬浮窗的时候，没有进入if判断   ===>>  连续打开/关闭悬浮窗的时候，第二次会 打不开悬浮窗，然后关闭的时候闪退  【解决】
         //当前界面为桌面且没有显示悬浮窗，则显示悬浮窗，否则移除悬浮窗
         if (FloatingUtils.isHome(mActivityManager, mPackageManager) && !FloatingPetManager.isFloatingWindowShowing()) {

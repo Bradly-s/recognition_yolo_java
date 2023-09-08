@@ -29,11 +29,11 @@
         <activity
             android:name=".view.activity.MainActivityLast"
             android:exported="true">
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MAIN" />-->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-<!--                <category android:name="android.intent.category.LAUNCHER" />-->
-<!--            </intent-filter>-->
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
 
         <activity
@@ -41,13 +41,13 @@
             android:exported="true"
             android:screenOrientation="portrait">
 
-            <!-- &lt;!&ndash;             开发调试时将其注释，开发完打开 &ndash;&gt; -->
-             <intent-filter>
-             <action android:name="android.intent.action.MAIN" />
+<!--            &lt;!&ndash; &lt;!&ndash;             开发调试时将其注释，开发完打开 &ndash;&gt; &ndash;&gt;-->
+<!--             <intent-filter>-->
+<!--             <action android:name="android.intent.action.MAIN" />-->
 
 
-             <category android:name="android.intent.category.LAUNCHER" />
-             </intent-filter>
+<!--             <category android:name="android.intent.category.LAUNCHER" />-->
+<!--             </intent-filter>-->
         </activity>
 <!--        <activity-->
 <!--            android:name=".view.activity.NewMainActivity"-->

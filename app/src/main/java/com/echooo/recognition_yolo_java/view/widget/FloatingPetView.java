@@ -123,6 +123,8 @@ public class FloatingPetView extends LinearLayout implements Runnable {
     private float mImgScaleX, mImgScaleY, mIvScaleX, mIvScaleY, mStartX, mStartY;
     private ProgressBar mProgressBar;
 
+    private String resultLast = "";
+
     public FloatingPetView(Context context, Application application) {
         super(context);
         mContext = context; // 初始化 mContext 成员变量
@@ -171,7 +173,7 @@ public class FloatingPetView extends LinearLayout implements Runnable {
 
     /**
      * 初始化可收缩布局
-     *          todo:  调整为结果显示界面
+     * 调整为结果显示界面
      */
     public void initExpandableView(Context context) {
 //        LayoutInflater inflater = LayoutInflater.from(context);
@@ -283,7 +285,7 @@ public class FloatingPetView extends LinearLayout implements Runnable {
                 mWindowManager.updateViewLayout(FloatingPetView.this, mParams);
 
 //                if(x != xInScreen && y != yInScreen){
-                if(y != yInScreen){
+                if (y != yInScreen) {
                     moveFlag = true;
                 }
 
@@ -312,8 +314,7 @@ public class FloatingPetView extends LinearLayout implements Runnable {
                         throw new RuntimeException(e);
                     }
                     moveFlag = false;
-                }
-                else {
+                } else {
 //                    更新状态
                     try {
                         LogUtils.logWithMethodInfo("更新 移动 状态");
@@ -351,8 +352,13 @@ public class FloatingPetView extends LinearLayout implements Runnable {
             //按住状态
             LogUtils.logWithMethodInfo("按住状态");
             touchPetStatus();
-            processYolo();
+            //先展开界面
+            processExpandableView();
             moveFlag = false;
+
+            //然后运行yolo
+            startThread();
+
         }
 //        else if (isNeedHide) {
 //            //没有按住，需要贴边，贴边即可
@@ -396,11 +402,42 @@ public class FloatingPetView extends LinearLayout implements Runnable {
         }
     }
 
-    public void processYolo() throws IOException {
-        LogUtils.logWithMethodInfo();
+    public void startThread() {
+        // 创建线程并启动它
+        Thread thread = new Thread(this);
+        thread.start();
+    }
 
+    // 如果需要在子线程中进行 UI 更新，可以使用 Handler 或其他通信方式
+    // 例如，在子线程中使用 Handler 向主线程发送消息
+
+    private Handler handler = new Handler(Looper.getMainLooper());
+
+    private void updateUIFromThread(String resultAll) {
+        LogUtils.logWithMethodInfo();
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                LogUtils.logWithMethodInfo("运行run");
+                // 在主线程中执行 UI 操作
+                TextView resultTextView = expandableView.findViewById(R.id.contract);
+//                resultTextView.setText(resultLast);
+                resultTextView.setText(resultAll);
+            }
+        });
+    }
+
+    @Override
+    public void run() {
+        LogUtils.logWithMethodInfo();
+        LogUtils.logWithMethodInfo("运行了");
         // 使用 mContext 从 assets 中加载测试图片
-        InputStream inputStream = mContext.getAssets().open("test1.png");
+        InputStream inputStream = null;
+        try {
+            inputStream = mContext.getAssets().open("test1.png");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 //        Bitmap imageBitmap = BitmapFactory.decodeStream(inputStream);
         mBitmap = BitmapFactory.decodeStream(inputStream);
         LogUtils.logWithMethodInfo("inputStream:" + inputStream);
@@ -422,91 +459,61 @@ public class FloatingPetView extends LinearLayout implements Runnable {
             PrePostProcessor.mClasses = new String[classes.size()];
             classes.toArray(PrePostProcessor.mClasses);
             LogUtils.logWithMethodInfo("classes:" + classes);
-            run();
+
+            //运行yolo
+            Bitmap resizedBitmap = Bitmap.createScaledBitmap(mBitmap, PrePostProcessor.mInputWidth, PrePostProcessor.mInputHeight, true);
+
+            final Tensor inputTensor = TensorImageUtils.bitmapToFloat32Tensor(resizedBitmap, PrePostProcessor.NO_MEAN_RGB, PrePostProcessor.NO_STD_RGB);
+            IValue[] outputTuple = mModule.forward(IValue.from(inputTensor)).toTuple();
+            final Tensor outputTensor = outputTuple[0].toTensor();
+            final float[] outputs = outputTensor.getDataAsFloatArray();
+            LogUtils.logWithMethodInfo("————————————————————————————————————————————————————————————————————");
+
+//        processAngle(mImgScaleX, mImgScaleY, mIvScaleX, mIvScaleY, mStartX, mStartY);
+            mImgScaleX = (float) mBitmap.getWidth() / PrePostProcessor.mInputWidth;
+            mImgScaleY = (float) mBitmap.getHeight() / PrePostProcessor.mInputHeight;
+            float mImageViewWidth = 1080.0F;
+            float mImageViewHeight = 1080.0F;
+
+            mIvScaleX = (mBitmap.getWidth() > mBitmap.getHeight() ? mImageViewWidth / mBitmap.getWidth() : mImageViewHeight / mBitmap.getHeight());
+            mIvScaleY = (mBitmap.getHeight() > mBitmap.getWidth() ? mImageViewHeight / mBitmap.getHeight() : mImageViewWidth / mBitmap.getWidth());
+
+            mStartX = (mImageViewWidth - mIvScaleX * mBitmap.getWidth()) / 2;
+            mStartY = (mImageViewHeight - mIvScaleY * mBitmap.getHeight()) / 2;
+            LogUtils.logWithMethodInfo("====================================================================");
+
+            //
+            final ArrayList<Result> results = PrePostProcessor.outputsToNMSPredictions(outputs, mImgScaleX, mImgScaleY, mIvScaleX, mIvScaleY, mStartX, mStartY);
+
+            StringBuilder finalResult = new StringBuilder();
+            for (Result result : results) {
+//            String classIndex = String.valueOf(result.classIndex); // 这里假设类名是一个整数
+                int classIndex = result.classIndex;
+                String confidence = String.valueOf(result.score);
+                String boundingBox = result.rect.toString();
+
+                LogUtils.logWithMethodInfo("Result中" + "className: " + yoloClasses.get(classIndex) + ", Confidence: " + confidence + ", BBox: " + boundingBox);
+                finalResult.append("className: ").append(yoloClasses.get(classIndex)).append(", Confidence: ").append(confidence).append(", BBox: ").append(boundingBox);
+            }
+
+//        将结果存入字典，写入收缩界面
+            TextView resultTextView = expandableView.findViewById(R.id.contract);
+            //         完成，
+            String pythonResult = processPythonNew();
+            String resultAll = finalResult + "\n" + pythonResult;
+            LogUtils.logWithMethodInfo("resultAll:" + resultAll);
+            // 在这里设置处理结果文本
+
+//            resultTextView.setText(resultAll);
+            LogUtils.logWithMethodInfo("resultLast:" + resultLast);
+            // 在子线程中调用 updateUIFromThread 方法，将 UI 更新操作传递到主线程
+            updateUIFromThread(resultAll);
+
+//        processExpandableView();
         } catch (IOException e) {
             Log.e("Object Detection", "Error reading assets", e);
             requestFinish();
         }
-    }
-
-    @Override
-    public void run() {
-        LogUtils.logWithMethodInfo();
-        Bitmap resizedBitmap = Bitmap.createScaledBitmap(mBitmap, PrePostProcessor.mInputWidth, PrePostProcessor.mInputHeight, true);
-
-        final Tensor inputTensor = TensorImageUtils.bitmapToFloat32Tensor(resizedBitmap, PrePostProcessor.NO_MEAN_RGB, PrePostProcessor.NO_STD_RGB);
-        IValue[] outputTuple = mModule.forward(IValue.from(inputTensor)).toTuple();
-        final Tensor outputTensor = outputTuple[0].toTensor();
-        final float[] outputs = outputTensor.getDataAsFloatArray();
-        LogUtils.logWithMethodInfo("mImgScaleX:" + mImgScaleX);
-        LogUtils.logWithMethodInfo("mImgScaleY:" + mImgScaleY);
-        LogUtils.logWithMethodInfo("mIvScaleX:" + mIvScaleX);
-        LogUtils.logWithMethodInfo("mIvScaleY:" + mIvScaleY);
-        LogUtils.logWithMethodInfo("mStartX:" + mStartX);
-        LogUtils.logWithMethodInfo("mStartY:" + mStartY);
-        LogUtils.logWithMethodInfo("————————————————————————————————————————————————————————————————————");
-
-//        processAngle(mImgScaleX, mImgScaleY, mIvScaleX, mIvScaleY, mStartX, mStartY);
-        mImgScaleX = (float) mBitmap.getWidth() / PrePostProcessor.mInputWidth;
-        mImgScaleY = (float) mBitmap.getHeight() / PrePostProcessor.mInputHeight;
-        float mImageViewWidth = 1080.0F;
-        float mImageViewHeight = 1080.0F;
-
-        mIvScaleX = (mBitmap.getWidth() > mBitmap.getHeight() ? mImageViewWidth / mBitmap.getWidth() : mImageViewHeight / mBitmap.getHeight());
-        mIvScaleY = (mBitmap.getHeight() > mBitmap.getWidth() ? mImageViewHeight / mBitmap.getHeight() : mImageViewWidth / mBitmap.getWidth());
-
-        mStartX = (mImageViewWidth - mIvScaleX * mBitmap.getWidth()) / 2;
-        mStartY = (mImageViewHeight - mIvScaleY * mBitmap.getHeight()) / 2;
-        LogUtils.logWithMethodInfo("mImgScaleX:" + mImgScaleX);
-        LogUtils.logWithMethodInfo("mImgScaleY:" + mImgScaleY);
-        LogUtils.logWithMethodInfo("====================================================================");
-
-        //
-        final ArrayList<Result> results = PrePostProcessor.outputsToNMSPredictions(outputs, mImgScaleX, mImgScaleY, mIvScaleX, mIvScaleY, mStartX, mStartY);
-//        final ArrayList<Result> results =  PrePostProcessor.outputsToNMSPredictions2(outputs, mImgScaleX, mImgScaleY, mIvScaleX, mIvScaleY, mStartX, mStartY);
-
-        LogUtils.logWithMethodInfo("inputTensor:" + inputTensor);
-        LogUtils.logWithMethodInfo("outputTuple:" + outputTuple);
-        LogUtils.logWithMethodInfo("outputTensor:" + outputTensor);
-        LogUtils.logWithMethodInfo("outputs:" + outputs);
-        LogUtils.logWithMethodInfo("results:" + results);
-        LogUtils.logWithMethodInfo("yoloClasses.size():" + yoloClasses.size());
-
-//        for (String className : yoloClasses) {
-//            LogUtils.logWithMethodInfo("className:" + className);
-//        }
-
-        StringBuilder finalResult = new StringBuilder();
-        for (Result result : results) {
-//            String classIndex = String.valueOf(result.classIndex); // 这里假设类名是一个整数
-            int classIndex = result.classIndex;
-            String confidence = String.valueOf(result.score);
-            String boundingBox = result.rect.toString();
-
-            LogUtils.logWithMethodInfo("Result中" + "className: " + yoloClasses.get(classIndex) + ", Confidence: " + confidence + ", BBox: " + boundingBox);
-            finalResult.append("className: ").append(yoloClasses.get(classIndex)).append(", Confidence: ").append(confidence).append(", BBox: ").append(boundingBox);
-        }
-
-//        将结果存入字典，写入收缩界面
-        TextView resultTextView = expandableView.findViewById(R.id.contract);
-        //         完成，
-        String pythonResult = processPythonNew();
-        String resultAll = finalResult + "\n" + pythonResult;
-        LogUtils.logWithMethodInfo("resultAll:" + resultAll);
-        // 在这里设置处理结果文本
-//        resultTextView.setText(finalResult);
-        resultTextView.setText(resultAll);
-        processExpandableView();
-
-
-//        runOnUiThread(() -> {
-//            mButtonDetect.setEnabled(true);
-//            mButtonDetect.setText(getString(R.string.detect));
-//            mProgressBar.setVisibility(ProgressBar.INVISIBLE);
-//            mResultView.setResults(results);
-//            mResultView.invalidate();
-//            mResultView.setVisibility(View.VISIBLE);
-//        });
     }
 
     public String processPythonNew() {
@@ -544,18 +551,14 @@ public class FloatingPetView extends LinearLayout implements Runnable {
 
 
     public void handleImageSelection(Uri selectedImage) {
-        try {
-            Bitmap selectedBitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), selectedImage);
-            // 在这里调用你的 YOLO 算法和相关处理逻辑
-            // 例如，你可以将 selectedBitmap 传递给算法并显示结果
-            // 更新宠物状态以展示处理结果
-            // 例如，你可以将展开界面的 TextView 设置为处理结果文本
-            TextView resultTextView = expandableView.findViewById(R.id.contract);
-            // 在这里设置处理结果文本
-            resultTextView.setText("Processing result: ...");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        //            Bitmap selectedBitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), selectedImage);
+        // 在这里调用你的 YOLO 算法和相关处理逻辑
+        // 例如，你可以将 selectedBitmap 传递给算法并显示结果
+        // 更新宠物状态以展示处理结果
+        // 例如，你可以将展开界面的 TextView 设置为处理结果文本
+        TextView resultTextView = expandableView.findViewById(R.id.contract);
+        // 在这里设置处理结果文本
+        resultTextView.setText("Processing result: ...");
     }
 
 
@@ -619,38 +622,6 @@ public class FloatingPetView extends LinearLayout implements Runnable {
         LogUtils.logWithMethodInfo("按住（拎起）状态");
 //        setPetImg(R.drawable.ic_face_02);
         setPetImg(R.drawable.pause);
-    }
-
-    /**
-     * 更新参数 - 移动时刻
-     *
-     * @param event
-     */
-    private void refreshParamsForMove(MotionEvent event) {
-        xInScreen = event.getRawX();
-        yInScreen = event.getRawY() - FloatingUtils.getStatusBarHeight(this);
-    }
-
-    /**
-     * 更新参数 - 按下时刻
-     *
-     * @param event
-     */
-    private void refreshParamsForDown(MotionEvent event) {
-        xInView = event.getX();
-        yInView = event.getY();
-        xDownInScreen = event.getRawX();
-        yDownInScreen = event.getRawY() - FloatingUtils.getStatusBarHeight(this);
-        refreshParamsForMove(event);
-    }
-
-    /**
-     * 更新小悬浮窗在屏幕中的位置。
-     */
-    private void updatePetPosition() {
-        mParams.x = (int) (xInScreen - xInView);
-        mParams.y = (int) (yInScreen - yInView);
-        mWindowManager.updateViewLayout(this, mParams);
     }
 
 }
